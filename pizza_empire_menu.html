@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pizza Empire — Digital Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --red: #D72B2B;
+    --orange: #F28C28;
+    --yellow: #FFC60A;
+    --dark: #1A1209;
+    --card: #231A0E;
+    --muted: #4A3A28;
+    --text: #F5EDDC;
+    --text-dim: #B8A98A;
+    --border: rgba(255,198,10,0.15);
+    --accent-glow: rgba(242,140,40,0.18);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #1A1209 0%, #2D1A06 60%, #3D2010 100%);
+    border-bottom: 2px solid var(--yellow);
+    padding: 32px 24px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(242,140,40,0.22) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 10vw, 88px);
+    letter-spacing: 4px;
+    color: var(--yellow);
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(255,198,10,0.3);
+  }
+  .hero h1 span { color: var(--orange); }
+  .hero-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+  .flame-row {
+    font-size: 22px;
+    margin-top: 10px;
+    letter-spacing: 8px;
+  }
+
+  /* NAV TABS */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(26,18,9,0.97);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 8px;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    flex-shrink: 0;
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .nav-tab:hover { color: var(--yellow); }
+  .nav-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+  /* SECTIONS */
+  .section {
+    display: none;
+    padding: 28px 16px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .section.active { display: block; }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    color: var(--orange);
+    margin-bottom: 6px;
+  }
+  .section-line {
+    height: 2px;
+    background: linear-gradient(90deg, var(--orange), transparent);
+    margin-bottom: 24px;
+    border-radius: 1px;
+  }
+
+  /* CATEGORY LABEL */
+  .cat-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin: 28px 0 14px;
+  }
+  .cat-label:first-child { margin-top: 0; }
+
+  /* ITEM CARD */
+  .item-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .item-card:hover {
+    border-color: rgba(255,198,10,0.35);
+    background: #2A1F0F;
+  }
+  .item-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .item-desc {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .item-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--yellow);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .item-price .rs { font-size: 13px; color: var(--text-dim); }
+
+  /* PRICE TABLE (Add-Ons, Shakes grid) */
+  .price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .price-row-name { font-weight: 600; font-size: 14px; }
+  .price-cols { display: flex; gap: 20px; }
+  .price-col { text-align: center; }
+  .price-col-head { font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 2px; }
+  .price-col-val { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--yellow); }
+
+  .cheese-note {
+    background: rgba(215,43,43,0.12);
+    border: 1px solid rgba(215,43,43,0.3);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #F5A0A0;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* QR SECTION */
+  .qr-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 24px;
+    text-align: center;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .qr-section h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .qr-section p { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+  #qr-box {
+    display: inline-block;
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  .qr-url-input {
+    width: 100%;
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    margin-bottom: 12px;
+  }
+  .qr-url-input:focus { border-color: var(--yellow); }
+  .qr-btn {
+    background: var(--orange);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 28px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background 0.2s;
+    margin-right: 8px;
+  }
+  .qr-btn:hover { background: var(--red); }
+  .qr-btn-dl {
+    background: transparent;
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qr-btn-dl:hover { background: rgba(255,198,10,0.1); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+  }
+  footer span { color: var(--orange); }
+
+  @media (max-width: 520px) {
+    .item-card { flex-direction: row; }
+    .price-cols { gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">🍕 Now Serving</div>
+  <h1>Pizza <span>Empire</span></h1>
+  <div class="hero-sub">Full Menu — Dine In · Takeaway · Delivery</div>
+  <div class="flame-row">🔥</div>
+</div>
+
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('burgers', this)">🍔 Burgers</button>
+    <button class="nav-tab" onclick="showSection('bread', this)">🥖 Bread</button>
+    <button class="nav-tab" onclick="showSection('pasta', this)">🍝 Pasta</button>
+    <button class="nav-tab" onclick="showSection('fries', this)">🍟 Sides & Fries</button>
+    <button class="nav-tab" onclick="showSection('shakes', this)">🥤 Shakes</button>
+    <button class="nav-tab" onclick="showSection('sandwich', this)">🥪 Sandwich</button>
+    <button class="nav-tab" onclick="showSection('allday', this)">☀️ All Day</button>
+    <button class="nav-tab" onclick="showSection('addons', this)">➕ Add-Ons</button>
+    <button class="nav-tab" onclick="showSection('qr', this)">📱 QR Code</button>
+  </div>
+</div>
+
+<!-- BURGERS -->
+<div id="burgers" class="section active">
+  <div class="section-title">Burgers</div>
+  <div class="section-line"></div>
+  <div class="cheese-note">🧀 Make your burger more cheesy — Add Cheese @ ₹20</div>
+  <div id="burger-list"></div>
+</div>
+
+<!-- BREAD -->
+<div id="bread" class="section">
+  <div class="section-title">Bread</div>
+  <div class="section-line"></div>
+  <div id="bread-list"></div>
+</div>
+
+<!-- PASTA -->
+<div id="pasta" class="section">
+  <div class="section-title">Pasta</div>
+  <div class="section-line"></div>
+  <div id="pasta-list"></div>
+</div>
+
+<!-- SIDES & FRIES -->
+<div id="fries" class="section">
+  <div class="section-title">Side Items & French Fries</div>
+  <div class="section-line"></div>
+  <div class="cat-label">Side Items</div>
+  <div id="sides-list"></div>
+  <div class="cat-label">French Fries</div>
+  <div id="fries-list"></div>
+</div>
+
+<!-- SHAKES -->
+<div id="shakes" class="section">
+  <div class="section-title">Shakes (Regular)</div>
+  <div class="section-line"></div>
+  <div id="shakes-list"></div>
+</div>
+
+<!-- SANDWICH -->
+<div id="sandwich" class="section">
+  <div class="section-title">Sandwich</div>
+  <div class="section-line"></div>
+  <div id="sandwich-list"></div>
+</div>
+
+<!-- ALL DAY -->
+<div id="allday" class="section">
+  <div class="section-title">All Day Delicious</div>
+  <div class="section-line"></div>
+  <div class="cat-label">Awesome Singles</div>
+  <div id="singles-list"></div>
+  <div class="cat-label">Fantastic Doubles</div>
+  <div id="doubles-list"></div>
+</div>
+
+<!-- ADD-ONS -->
+<div id="addons" class="section">
+  <div class="section-title">Add-Ons</div>
+  <div class="section-line"></div>
+  <div id="addons-list"></div>
+</div>
+
+<!-- QR CODE -->
+<div id="qr" class="section">
+  <div class="section-title">Share This Menu</div>
+  <div class="section-line"></div>
+  <div class="qr-section">
+    <h3>📱 Scan & Order</h3>
+    <p>Generate a QR code for this menu — paste your hosted URL or share this page's link.</p>
+    <div id="qr-box"></div>
+    <br>
+    <input class="qr-url-input" id="qr-url" type="text" placeholder="Enter menu URL (e.g. https://yourmenu.com)" value="">
+    <br>
+    <button class="qr-btn" onclick="generateQR()">Generate QR</button>
+    <button class="qr-btn-dl" onclick="downloadQR()">⬇ Download</button>
+  </div>
+</div>
+
+<footer>
+  📞 <span>76-093-880-84 · 76-093-480-08</span> &nbsp;|&nbsp; Pizza Empire &nbsp;|&nbsp; Digital Menu v1.0
+</footer>
+
+<script>
+const DATA = {
+  burgers: [
+    { name: "Aloo Tikki Burger", desc: "Single Layer Of Sauce, Onion & Aloo Patty", price: 35 },
+    { name: "Classic Burger", desc: "2 Types Of Sauce, Onion, Tomato & Potato Herb Patty", price: 49 },
+    { name: "Veggie Burger", desc: "2 Types Of Sauce, Onion, Tomato With Veggie Patty", price: 59 },
+    { name: "Supreme Burger", desc: "2 Types Of Sauce, Onion, Jalapinos & Veggie Patty", price: 59 },
+    { name: "Chilli Cheese Burger", desc: "Spicy Sauce, Onion, Red Pepper & Veggie Patty", price: 69 },
+    { name: "Tandoori Burger", desc: "Tandoori Sauce, Onion, Red Pepper & Veggie Patty", price: 89 },
+    { name: "Makhani Burger", desc: "Makhani Sauce, Onion, Tomato & Veggie Patty", price: 89 },
+    { name: "Royal Paneer Burger", desc: "2 Types Of Sauce, Onion, Tomato & Spicy Paneer Patty", price: 139 },
+  ],
+  bread: [
+    { name: "Garlic Bread", desc: "", price: 89 },
+    { name: "Stuffed Garlic Bread", desc: "", price: 119 },
+    { name: "Cheesy Dip", desc: "", price: 30 },
+  ],
+  pasta: [
+    { name: "Tangy Red Sauce Pasta", desc: "Penne Pasta Cooked With Red Sauce & Veggies", price: 99 },
+    { name: "Mix Mania", desc: "2 Types of Delicious Flavoured Sauce With Combination of Veggies", price: 129 },
+    { name: "Cheesy White Sauce Pasta", desc: "Cooked in Creamy White Sauce With Exotic Veggies", price: 139 },
+    { name: "Tandoori Sauce Special", desc: "Pasta With Exotic Veggies Tossed In Tandoori Sauce & Seasoned With Herb", price: 149 },
+    { name: "Makhani & Cheesy Pasta", desc: "Pasta Tossed in Creamy Indian Inspired Sauce With Lots of Veggies", price: 149 },
+  ],
+  sides: [
+    { name: "Chocolava Cake", desc: "", price: 79 },
+    { name: "Zingy Parcel (2 pcs)", desc: "", price: 59 },
+    { name: "Calzone Pockets", desc: "", price: 119 },
+  ],
+  fries: [
+    { name: "Classic Fries", desc: "", price: 79 },
+    { name: "Peri-Peri Fries", desc: "", price: 89 },
+    { name: "Cheesy Fries", desc: "", price: 99 },
+  ],
+  shakes: [
+    { name: "Vanilla Shake", desc: "Regular", price: 69 },
+    { name: "Strawberry", desc: "Regular", price: 69 },
+    { name: "Butterscotch", desc: "Regular", price: 69 },
+    { name: "Pineapple", desc: "Regular", price: 69 },
+    { name: "Oreo Shake", desc: "Regular", price: 99 },
+    { name: "Kitket Shake", desc: "Regular", price: 99 },
+    { name: "Cold Coffee", desc: "Regular", price: 79 },
+  ],
+  sandwich: [
+    { name: "Coleslaw Sandwich", desc: "", price: 59 },
+    { name: "Veg Delight Sandwich", desc: "", price: 89 },
+    { name: "Paneer Tikka Sandwich", desc: "", price: 109 },
+    { name: "Club Sandwich", desc: "", price: 139 },
+  ],
+  singles: [
+    { name: "Cheese & Soya", desc: "", price: 69 },
+    { name: "Cheese & Onion", desc: "", price: 75 },
+    { name: "Cheese & Tomato", desc: "", price: 79 },
+    { name: "Cheese & Corn", desc: "", price: 85 },
+    { name: "Cheese & Capsicum", desc: "", price: 89 },
+  ],
+  doubles: [
+    { name: "Cheese, Onion & Paneer", desc: "", price: 99 },
+    { name: "Cheese, Onion & Jalapeno", desc: "", price: 99 },
+    { name: "Cheese, Capsicum & Soya", desc: "", price: 99 },
+    { name: "Cheese, Corn & Red Papri", desc: "", price: 99 },
+  ],
+  addons: [
+    { name: "Extra Cheese", reg: 25, med: 50, large: 75 },
+    { name: "Extra Topping", reg: 20, med: 40, large: 60 },
+    { name: "Cheese Burst", reg: 75, med: 99, large: "—" },
+  ]
+};
+
+function card(item) {
+  return `<div class="item-card">
+    <div>
+      <div class="item-name">${item.name}</div>
+      ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
+    </div>
+    <div class="item-price"><span class="rs">₹</span>${item.price}</div>
+  </div>`;
+}
+
+function renderList(id, arr) {
+  document.getElementById(id).innerHTML = arr.map(card).join('');
+}
+
+renderList('burger-list', DATA.burgers);
+renderList('bread-list', DATA.bread);
+renderList('pasta-list', DATA.pasta);
+renderList('sides-list', DATA.sides);
+renderList('fries-list', DATA.fries);
+renderList('shakes-list', DATA.shakes);
+renderList('sandwich-list', DATA.sandwich);
+renderList('singles-list', DATA.singles);
+renderList('doubles-list', DATA.doubles);
+
+// Add-Ons with 3 price cols
+document.getElementById('addons-list').innerHTML = `
+  <div style="display:flex;justify-content:flex-end;gap:20px;padding:0 16px 8px;font-size:10px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;">
+    <span style="width:48px;text-align:center">Reg</span>
+    <span style="width:48px;text-align:center">Med</span>
+    <span style="width:48px;text-align:center">Large</span>
+  </div>
+` + DATA.addons.map(a => `
+  <div class="price-row">
+    <div class="price-row-name">${a.name}</div>
+    <div class="price-cols">
+      <div class="price-col"><div class="price-col-val">₹${a.reg}</div></div>
+      <div class="price-col"><div class="price-col-val">₹${a.med}</div></div>
+      <div class="price-col"><div class="price-col-val">${a.large !== "—" ? '₹'+a.large : '—'}</div></div>
+    </div>
+  </div>
+`).join('');
+
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+// QR Code
+let qrInstance = null;
+function generateQR() {
+  const url = document.getElementById('qr-url').value.trim() || window.location.href;
+  const box = document.getElementById('qr-box');
+  box.innerHTML = '';
+  qrInstance = new QRCode(box, {
+    text: url,
+    width: 200,
+    height: 200,
+    colorDark: "#1A1209",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-box canvas');
+  if (!canvas) { generateQR(); setTimeout(downloadQR, 400); return; }
+  const a = document.createElement('a');
+  a.download = 'pizza-empire-qr.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+// Auto-generate QR on load with current URL
+window.addEventListener('load', () => {
+  document.getElementById('qr-url').value = window.location.href;
+  generateQR();
+});
+</script>
+</body>
+</html>
